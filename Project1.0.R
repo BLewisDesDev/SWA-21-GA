@@ -10,7 +10,7 @@ library(ggplot2)
 # -- Directory (Add your working directory here)
 
 #Ryan
-directory <- "K:\UNI\WSU\Semester 2\SWA\Group Project\SWA-21-GA"
+directory <- "K:/UNI/WSU/Semester 2/SWA/Group Project/SWA-21-GA"
 setwd(directory)
 
 #Byron
