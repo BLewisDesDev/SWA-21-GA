@@ -14,8 +14,8 @@ library(ggplot2)
 #setwd(directory)
 
 #Byron
-#directory<-"/Users/CollectiveX/Desktop/Repos/SWA-21-GA"
-#setwd(directory)
+directory<-"/Users/CollectiveX/Desktop/Repos/SWA-21-GA"
+setwd(directory)
 
 # -- -- Question 8.1 -- -- -- #
 
@@ -43,14 +43,25 @@ print(sourceTable)
 chisq <- chisq.test(sourceTable)
 chisq
 
-# -- 8.1.5 (Bootstrap Distribution for Iphone)
-sourceTable[7:8]
-colSums(sourceTable)
-rowSums(sourceTable)
+# -- 8.1.5 (Bootstrap Distribution for iPhone)
+obs = 722
+sampleSize = 2000
+pHat = obs/sampleSize
+complement = sampleSize-obs
 
+b = 10000
+boot.dist.iPhone = rep(0,b)
+propVec = c(replicate(obs,TRUE),replicate(complement,FALSE))
 
+for (i in 1:b) {
+  bootsample = table(sample(propVec,replace=TRUE))
+  boot.dist.iPhone[i] = bootsample[2]/2000
+}
 
-# -- 8.1.6
+hist(boot.dist.iPhone)
+
+# -- 8.1.6 (95% Confidence Interval)
+quantile(boot.dist.iPhone, c(0.005, 0.995))
 
 # -- -- Question 8.2
 
