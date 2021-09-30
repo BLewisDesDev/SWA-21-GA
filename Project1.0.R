@@ -9,9 +9,9 @@ library(ggplot2)
 
 # -- Directory (Add your working directory here)
 
-#Name
-#directory <- ""
-#setwd(directory)
+#Ryan
+directory <- "K:\UNI\WSU\Semester 2\SWA\Group Project\SWA-21-GA"
+setwd(directory)
 
 #Byron
 #directory<-"/Users/CollectiveX/Desktop/Repos/SWA-21-GA"
