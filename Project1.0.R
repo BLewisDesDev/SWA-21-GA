@@ -3,6 +3,7 @@
 # -- Libraries
 library(readxl)
 library(ggplot2)
+library(rtweet)
 
 # -- Directory (Add your working directory here)
 
@@ -16,6 +17,23 @@ setwd("/Users/CollectiveX/Desktop/Repos/SWA-21-GA")
 # -- -- Question 8.1 -- -- -- #
 
 # -- 8.1.1
+app="SWA5430"                                
+key= "fGP35vn7MIpD1Mwig2rQuKEcl"
+secret= "66fedVhW2urfx95iJ5tVU6DmmOsxWDXz7p8uLIrjpOBVGxD4ma"       
+access_token="1131346472-RPfQOGfRBjx3KauX5GMYqY21Qw46x0sPVXFAXgB" 
+access_secret="T4iOcRZ3Cv3bz3WhX8Aulhr91HQu8GMLcamLBmGMJG6mh"     
+
+#authenticate 
+twitter_token=create_token(app, key, secret, access_token, access_secret, set_renv = FALSE)
+
+#search for some tweets about LilNasX = tweets
+tweets =search_tweets('LilNasX', n = 1000, token = twitter_token, include_rts = FALSE, lang='en')
+write_as_csv(tweets, 'tweets.csv')
+
+#tweets containing 'the' = random
+random =search_tweets('the', n = 1000, token = twitter_token, include_rts = FALSE, lang='en')
+write_as_csv(random, 'random.csv')
+
 tweets = read.csv("tweets.csv", as.is = TRUE)
 TSTable = table(tweets$source)
 
@@ -80,6 +98,44 @@ quantile(boot.dist.iPhone, c(0.005, 0.995))
 # -- -- Question 8.2
 
 # -- 8.2.7
+
+tweet.text = (tweets$text[1:1000])
+
+tweet.corpus = Corpus(VectorSource(tweet.text))
+tweet.corpus = tm_map(tweet.corpus, function(x) iconv(x, to='ASCII'))
+
+#ignore url
+tweet.corpus = tm_map(tweet.corpus,content_transformer(function(x) gsub("(f|ht)tp(s?)://\\S+","",x)))
+#remove username
+tweet.corpus = tm_map(tweet.corpus,content_transformer(function(x) gsub("@\\w+","",x)))
+tweet.corpus = tm_map(tweet.corpus, removeNumbers)
+tweet.corpus = tm_map(tweet.corpus, removePunctuation)
+stopwordlist  = c(stopwords(), "thank", "also", "the", "this", "will", "there", "see", "put")
+tweet.corpus = tm_map(tweet.corpus, removeWords, stopwordlist)
+tweet.corpus = tm_map(tweet.corpus, stemDocument)
+tweet.corpus = tm_map(tweet.corpus, stripWhitespace)
+tweet.corpus = tm_map(tweet.corpus,tolower)
+
+tweet.tdm = TermDocumentMatrix(tweet.corpus)
+tweet.wtdm = weightTfIdf(tweet.tdm)
+tweet.matrix = t(as.matrix(tweet.wtdm)) #tweet.matrix is now in DTM form
+
+#observe the dim of tweet.matrix 
+dim(tweet.matrix)
+tweet.matrix[1,1:10] #observe a column in tweet.matrix represents a term in tweets
+
+#so each row represents a tweet
+## remove empty tweets.
+empties = which(rowSums(abs(tweet.matrix)) == 0)#In a DTM, 0 rowsum means that doc is empty
+length(empties)
+
+if(length(empties)!=0){
+  tweet.matrix = tweet.matrix[-empties,] 
+}
+
+dim(tweet.matrix)
+View(tweet.matrix)
+
 # -- 8.2.8
 # -- 8.2.9
 # -- 8.2.10
