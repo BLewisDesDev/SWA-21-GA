@@ -93,6 +93,8 @@ quantile(boot.dist.iPhone, c(0.005, 0.995))
 
 # -- -- Question 8.4
 
+#Working on this now...
+
 # -- 8.4.15
 # -- 8.4.16
 # -- 8.4.17
