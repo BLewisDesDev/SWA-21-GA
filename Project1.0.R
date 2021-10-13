@@ -4,12 +4,16 @@
 library(readxl)
 library(ggplot2)
 library(rtweet)
+library("tm")
+library(SnowballC)
+library(rtweet)
+
 
 # -- Directory (Add your working directory here)
 
-#Name
-#directory <- ""
-#setwd(directory)
+#Ryan
+directory <- "K:/UNI/WSU/Semester 2/SWA/Group Project/SWA-21-GA"
+setwd(directory)
 
 #Byron
 setwd("/Users/CollectiveX/Desktop/Repos/SWA-21-GA")
@@ -137,9 +141,46 @@ dim(tweet.matrix)
 View(tweet.matrix)
 
 # -- 8.2.8
+
+## Normalizing all the tweets
+
+norm.tweet.matrix = diag(1/sqrt(rowSums(tweet.matrix^2))) %*% tweet.matrix
+
+## then create a distance matrix
+D = dist(norm.tweet.matrix, method = "euclidean")^2/2
+
+## perform MDS using 100 dimensions
+mds.tweet.matrix <- cmdscale(D, k=100)
+
+##For loop to work out how many clusters
+n = 15
+SSW = rep(0, n)
+for (a in 1:n) {
+  K = kmeans(mds.tweet.matrix, a, nstart = 20)
+  SSW[a] = K$tot.withinss
+}
+
+## plot the results to find the elbow
+plot(1:15, SSW, type = "b")
+
+##From this we know that ~5-6 clusters is most likely the best way to cluster the data.
+
 # -- 8.2.9
+
+##Perform Kmeans with the matrix and with 6 clusters
+K = kmeans(mds.tweet.matrix, 2, nstart = 20)
+
 # -- 8.2.10
+
+##Plot the graph using the clusters as colour references
+plot(mds.tweet.matrix, col=K$cluster)
+
 # -- 8.2.11
+
+##Print a table of the cluster numbers so we know which cluster is largest
+table(K$cluster)
+
+##From here we can see Cluster 2 is the largest between the two
 
 # -- -- Question 8.3
 
