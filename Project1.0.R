@@ -199,21 +199,28 @@ wordcloud(names(words),words, random.order = FALSE, min.words = 3)
 # -- 8.3.13
 dim(tweet.matrix)
 
+## Taking the terms of documents existed more than 4 documents
 frequent.words = which(apply(tweet.matrix > 0) > 4)
-length(frequent.words)
+length(frequent.words) ## numbers of words have multiple appearance
 
 term.matrix = tweet.matrix[,frequent.words]
 
-dim(term.matrix)
+dim(term.matrix) ## shows the output of term.matrix
 
+## Cosine Distance Calculation
 norm.term.matrix = term.matrix %*% diag(1/sqrt(colSums(term.matrix^2)))
 colnames(norm.term.matrix) = colnames(term.matrix)
 tdm = t(norm.term.matrix)
 D= dist(tdm)^2/2
 h=hclust(D, method = "complete")
-plot(h)
+plot(h) ## Output the dendrogram
 
 # -- 8.3.14
+## we know that the common thing about LilNasX comments are his supportive action through LGBTQ addressing he is GAY 
+## and through his vulnerability to other guys, he has lovesickness through guys and the data describes itself,
+## opening his expressions to his followers and his friends.
+
+## naughty things also mentioned in the data
 
 # -- -- Question 8.4
 
