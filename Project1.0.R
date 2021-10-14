@@ -7,6 +7,8 @@ library(rtweet)
 library("tm")
 library(SnowballC)
 library(rtweet)
+library(wordcloud)
+library(RColorBrewer)
 
 
 # -- Directory (Add your working directory here)
@@ -18,6 +20,8 @@ setwd(directory)
 #Byron
 setwd("/Users/CollectiveX/Desktop/Repos/SWA-21-GA")
 
+#Gideon
+setwd("/Users/GideonKho/Documents/SWA/SWA-21-GA")
 # -- -- Question 8.1 -- -- -- #
 
 # -- 8.1.1
@@ -185,7 +189,30 @@ table(K$cluster)
 # -- -- Question 8.3
 
 # -- 8.3.12
+## In order to make words visible into the plots, WordCloud needs Term freqs in corpus
+tweet.wtdm = weightTfIdf(tweet.tdm) ## tweet.tdm is the Term Freq by using weightTfIdf
+T = as.matrix(tweet.wtdm) ## Makes the matrix from previous script
+words = rowSums(T) ## rows are terms in TDM
+## Execute the command and output the common words that LilNasX comments had
+wordcloud(names(words),words, random.order = FALSE, min.words = 3)
+
 # -- 8.3.13
+dim(tweet.matrix)
+
+frequent.words = which(apply(tweet.matrix > 0) > 4)
+length(frequent.words)
+
+term.matrix = tweet.matrix[,frequent.words]
+
+dim(term.matrix)
+
+norm.term.matrix = term.matrix %*% diag(1/sqrt(colSums(term.matrix^2)))
+colnames(norm.term.matrix) = colnames(term.matrix)
+tdm = t(norm.term.matrix)
+D= dist(tdm)^2/2
+h=hclust(D, method = "complete")
+plot(h)
+
 # -- 8.3.14
 
 # -- -- Question 8.4
