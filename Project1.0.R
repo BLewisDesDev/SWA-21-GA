@@ -1,15 +1,20 @@
 # -- -- -- SWA Group X 2021 Major Project -- -- -- #
 
-# -- Libraries
+# -- Install Libraries
+install.packages("readxl")
+install.packages("ggplot2")
+install.packages("rtweet")
+install.packages("igraph")
+install.packages("SnowballC")
+
+# -- Attach Libraries
 library(readxl)
 library(ggplot2)
 library(rtweet)
+library(igraph)
+library(SnowballC)
 
 # -- Directory (Add your working directory here)
-
-#Name
-#directory <- ""
-#setwd(directory)
 
 #Byron
 setwd("/Users/CollectiveX/Desktop/Repos/SWA-21-GA")
@@ -17,11 +22,13 @@ setwd("/Users/CollectiveX/Desktop/Repos/SWA-21-GA")
 # -- -- Question 8.1 -- -- -- #
 
 # -- 8.1.1
+
+# -- OMERS Deets
 app="SWA5430"                                
 key= "fGP35vn7MIpD1Mwig2rQuKEcl"
 secret= "66fedVhW2urfx95iJ5tVU6DmmOsxWDXz7p8uLIrjpOBVGxD4ma"       
 access_token="1131346472-RPfQOGfRBjx3KauX5GMYqY21Qw46x0sPVXFAXgB" 
-access_secret="T4iOcRZ3Cv3bz3WhX8Aulhr91HQu8GMLcamLBmGMJG6mh"     
+access_secret="T4iOcRZ3Cv3bz3WhX8Aulhr91HQu8GMLcamLBmGMJG6mh"   
 
 #authenticate 
 twitter_token=create_token(app, key, secret, access_token, access_secret, set_renv = FALSE)
@@ -53,8 +60,6 @@ rownames(sourceTable) = c("Tweets","Random")
 print(sourceTable)
 #rowSums(sourceTable)
 
-intersect(names(TSTable), names(RSTable))
-
 # I think this gives junk data cause there are so many sources that dont overlap.
 # I think we should take only the sources that overlap
 # Create another category called "other" and then compute. (Not what is asked but i think a better way)
@@ -69,10 +74,10 @@ colnames(AbSourceTable) = AbreviatedSources
 rownames(AbSourceTable) = c("Tweets","Random")
 
 print(AbSourceTable)
-#rowSums(AbSourceTable) 
+#rowSums(AbSourceTable) #check if all tweets accounted for
 
 # -- 8.1.4 (Chi Squared Test for Independence)
-chisq.test(sourceTable, simulate.p.value = TRUE) #(Lots of counts of 1, simulate pvalues used to make test better)
+chisq.test(sourceTable, simulate.p.value = TRUE) #(Lots of counts of 1, simulate pvalues used to make test more accurate)
 chisq.test(AbSourceTable)
 
 # -- 8.1.5 (Bootstrap Distribution for iPhone)
@@ -94,6 +99,41 @@ hist(boot.dist.iPhone)
 
 # -- 8.1.6 (95% Confidence Interval)
 quantile(boot.dist.iPhone, c(0.005, 0.995))
+
+
+
+
+##### REDO #####
+
+
+tweetSamp = 458/1000
+tweetSamp
+randSamp = 264/1000
+randSamp
+
+# -- 8.1.5 (Bootstrap Distribution for iPhone)
+obs = 264
+sampleSize = 1000
+pHat = obs/sampleSize
+complement = sampleSize-obs
+
+b = 10000
+boot.dist.iPhone = rep(0,b)
+propVec = c(replicate(obs,TRUE),replicate(complement,FALSE))
+
+for (i in 1:b) {
+  bootsample = table(sample(propVec,replace=TRUE))
+  boot.dist.iPhone[i] = bootsample[2]/sampleSize
+}
+
+hist(boot.dist.iPhone)
+
+# -- 8.1.6 (95% Confidence Interval)
+quantile(boot.dist.iPhone, c(0.005, 0.995))
+
+
+##### REDO #####
+
 
 # -- -- Question 8.2
 
@@ -149,8 +189,76 @@ View(tweet.matrix)
 
 # -- -- Question 8.4
 
-# -- 8.4.15
+#app = "SWA2021B"
+#key = "ODXHzs5gKRsmSjzIYgPtf7CcA"
+#secret = "MMMX25niSKlRlP4hN1xPghzA2HmfdfE355DRgsONOlxicLjPlu"
+#access_token = "1292601739447697408-nLsCLI09bfHWVeJJzZKhKun5DFn6a6"
+#access_secret = "LpnI1Pac3a1DPSbQEVeeP7w4Kh10IsY8dkiy4OHTF647u"
+
+#authenticate 
+#twitter_token = create_token(app, key, secret, access_token, access_secret, set_renv = FALSE)
+
+# -- 8.4.15 
+LilNas = lookup_users(c("LilNasX"), token = twitter_token)
+names(LilNas)
+LilNas$friends_count
+LilNas$screen_name
+LilNas$followers_count
+
+FriendList = get_friends(LilNas$screen_name, token = twitter_token)
+LilNasFriends = lookup_users(FriendList$user_id, token = twitter_token)
+
+friendRank = order(LilNasFriends$followers_count, decreasing = TRUE)[1:20] 
+topFriends = LilNasFriends[friendRank,] #details of top 10 friends
+topFriends
+
 # -- 8.4.16
+TweetsPosted = topFriends$statuses_count
+
 # -- 8.4.17
+n = nrow(topFriends)
+
+#create edge list for graph
+el.Nas = cbind(rep(LilNas$screen_name, n), topFriends$screen_name)
+
+#loops through friends list, checks following status and adds to a vector, and appends to edge list
+for (i in 1:n) {
+  for (j in i:n) {
+    fr = lookup_friendships(topFriends$screen_name[j], topFriends$screen_name[i], parse = TRUE, token = twitter_token)
+    fr
+    
+    if(fr$value[4] == TRUE) {
+    el.Nas = rbind(el.Nas,c(fr$user[1], fr$value[3]))
+    }
+  
+    if(fr$value[5] == TRUE) {
+    el.Nas = rbind(el.Nas,c(fr$value[3], fr$user[1]))
+    }
+  }
+}
+
+# -- Build a Graph -- #
+nodes = c(LilNas$screen_name,topFriends$screen_name)
+sizes = c(LilNas$statuses_count, TweetsPosted)
+
+node.size = setNames(sizes,nodes)
+
+edges = graph.edgelist(el.Nas)
+plot(edges, vertex.size = node.size/10000, edge.arrow.size=0.1)
+
+#The graph has wildly different vertex sizes
+#Smallest and largest values 15x different
+max(sizes)
+min(sizes)
+
 # -- 8.4.18
-# -- 8.4.19
+
+betweenness(edges)
+nodes[order(betweenness(edges), decreasing = TRUE)]
+
+#Top 3 Central nodes
+nodes[4]
+nodes[7]
+nodes[2]
+
+# -- 8.4.19 Comments...
