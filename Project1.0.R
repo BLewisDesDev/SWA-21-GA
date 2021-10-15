@@ -13,6 +13,8 @@ library(ggplot2)
 library(rtweet)
 library(igraph)
 library(SnowballC)
+library(tm)
+library(SnowballC)
 
 
 # -- Directory (Add your working directory here)
@@ -210,7 +212,7 @@ K = kmeans(mds.tweet.matrix, 2, nstart = 20)
 # -- 8.2.10
 
 ##Plot the graph using the clusters as colour references
-plot(mds.tweet.matrix, col=K$cluster)
+plot(mds.tweet.matrix, col=K$cluster, xlab="x₁", ylab ="x₂")
 
 # -- 8.2.11
 
