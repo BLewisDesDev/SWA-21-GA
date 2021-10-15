@@ -178,9 +178,11 @@ plot(mds.tweet.matrix, col=K$cluster)
 # -- 8.2.11
 
 ##Print a table of the cluster numbers so we know which cluster is largest
-table(K$cluster)
+resultsTable = table(K$cluster)
+rownames(resultsTable) = c("Cluster 1", "Cluster 2")
+View(resultsTable)
 
-##From here we can see Cluster 2 is the largest between the two
+##From here we can see Cluster 1 is the largest between the two
 
 # -- -- Question 8.3
 
